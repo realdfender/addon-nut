@@ -6,13 +6,21 @@ FROM ${BUILD_FROM}
 # hadolint ignore=DL3003
 RUN \
     apt-get update \
-    && apt-get install -y --no-install-recommends\
-        nut=2.8.0-7 \
-        nut-snmp=2.8.0-7 \
-        nut-xml=2.8.0-7 \
-        usbutils=1:014-1+deb12u1 \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        libusb-1.0-0-dev \
+        libssl-dev \
+        libsnmp-dev \
+        pkg-config \
+        git \
+    && git clone https://github.com/networkupstools/nut.git /usr/src/nut \
+    && cd /usr/src/nut \
+    && ./autogen.sh \
+    && ./configure --with-drivers=all --with-usb --with-snmp \
+    && make -j$(nproc) \
+    && make install \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* /usr/src/nut
 
 # Copy root filesystem
 COPY rootfs /
